@@ -1,0 +1,11 @@
+# Python 3.9-kompatibel (System-Python auf macOS, kein Homebrew nötig).
+# WICHTIG: Nicht direkt mit "pip install -r" installieren, sondern "bash setup.sh"
+# nutzen – google-genai und gradio 4 haben einen websockets-Versionskonflikt,
+# der in zwei Schritten aufgelöst wird (siehe setup.sh).
+scenedetect>=0.6.4
+opencv-python-headless>=4.8,<4.13
+gradio>=4.44,<5
+huggingface_hub>=0.19,<1.0
+pydantic>=2.6,<2.11
+imageio-ffmpeg>=0.5
+# Schritt 2 (setup.sh): google-genai>=1.0 + websockets>=13,<14

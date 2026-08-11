@@ -1,0 +1,18 @@
+# Virtuelle Umgebung
+venv/
+.venv/
+
+# API-Keys / Secrets
+.env
+
+# Analyse-Ergebnisse & Testdaten
+outputs/
+testdata/
+*.mp4
+*.mov
+*.webm
+
+# Python
+__pycache__/
+*.pyc
+.DS_Store
