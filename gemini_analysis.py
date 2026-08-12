@@ -204,8 +204,8 @@ ZU BESCHREIBENDE EINHEITEN:
 # Client / Requests
 # ---------------------------------------------------------------------------
 
-def make_client():
-    api_key = config.get_api_key()
+def make_client(api_key_override=""):
+    api_key = (api_key_override or "").strip() or config.get_api_key()
     if not api_key:
         raise AnalysisError(
             "Kein API-Key gefunden. Setze GEMINI_API_KEY als Umgebungsvariable "

@@ -1,0 +1,19 @@
+# Render.com-Konfiguration für den Video-Shot-Analyzer als Web-Service.
+# Empfohlener Weg: im Render-Dashboard "New > Blueprint" auf dieses Repo –
+# dann gelten die Einstellungen hier automatisch.
+# ACHTUNG bei manueller Anlage ("New > Web Service"): Renders vorgefüllten
+# Build Command 'pip install -r requirements.txt' unbedingt durch
+# 'pip install -r requirements-render.txt' ersetzen! requirements.txt ist die
+# Mac-Datei OHNE google-genai – der Start bricht sonst mit ModuleNotFoundError ab.
+services:
+  - type: web
+    name: video-shot-analyzer
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GEMINI_API_KEY
+        sync: false # Secret: wird im Dashboard gesetzt, nie ins Repo!

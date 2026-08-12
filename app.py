@@ -18,10 +18,25 @@ import pipeline
 from gemini_analysis import AnalysisError, QuotaExceededError
 
 
+# Läuft die App gehostet in der Cloud (Hugging Face Spaces setzt SPACE_ID,
+# Render.com setzt RENDER)? Dann: von außen erreichbar sein, Server-Key als
+# "Demo-Key" behandeln und kein Browserfenster öffnen.
+ON_HOSTED = bool(os.environ.get("SPACE_ID") or os.environ.get("RENDER"))
+
+
 def startup_status():
     parts = []
     if config.get_api_key():
-        parts.append("✅ GEMINI_API_KEY gefunden")
+        if ON_HOSTED:
+            parts.append("✅ Demo-Key aktiv (fair bleiben: für viele Analysen bitte "
+                         "eigenen Gemini-Key ins Feld unten eintragen – kostenlos auf "
+                         "[aistudio.google.com/apikey](https://aistudio.google.com/apikey))")
+        else:
+            parts.append("✅ GEMINI_API_KEY gefunden")
+    elif ON_HOSTED:
+        parts.append("⚠️ Kein Server-Key hinterlegt – bitte eigenen Gemini-API-Key ins "
+                     "Feld unten eintragen (kostenlos auf "
+                     "[aistudio.google.com/apikey](https://aistudio.google.com/apikey)).")
     else:
         parts.append("❌ **GEMINI_API_KEY fehlt** – setze ihn per `export GEMINI_API_KEY=...` "
                      "oder lege eine `.env`-Datei mit `GEMINI_API_KEY=...` in den Projektordner "
@@ -51,12 +66,16 @@ def do_scan(video_path, threshold):
         return "❌ Lokale Analyse fehlgeschlagen: %s" % e, None
 
 
-def do_analyze(video_path, threshold, with_summary, allow_many, product_hint, scan,
-               progress=gr.Progress()):
+def do_analyze(video_path, threshold, with_summary, allow_many, product_hint,
+               user_api_key, scan, progress=gr.Progress()):
     empty = ("", "", "", None)
+    user_api_key = (user_api_key or "").strip()
     if not video_path:
         return ("Bitte zuerst ein Video hochladen.",) + empty
-    if not config.get_api_key():
+    if not user_api_key and not config.get_api_key():
+        if ON_HOSTED:
+            return ("❌ Kein API-Key verfügbar. Bitte eigenen Gemini-API-Key ins Feld "
+                    "eintragen (kostenlos auf aistudio.google.com/apikey).",) + empty
         return ("❌ Kein GEMINI_API_KEY gesetzt. Siehe Hinweis oben, dann App neu starten.",) + empty
 
     try:
@@ -81,7 +100,7 @@ def do_analyze(video_path, threshold, with_summary, allow_many, product_hint, sc
 
         markdown, json_dict, md_path, json_path = pipeline.run_analysis(
             scan, with_summary=with_summary, product_hint=(product_hint or ""),
-            progress=report)
+            api_key_override=user_api_key, progress=report)
         status = ("✅ Fertig – %d Einheiten beschrieben, %d Gemini-Request(s) verbraucht.\n"
                   "Gespeichert unter:\n%s\n%s" % (len(scan.units), n_req, md_path, json_path))
         json_text = json.dumps(json_dict, ensure_ascii=False, indent=2)
@@ -113,6 +132,11 @@ def build_ui():
                     label="Hauptprodukt (optional)",
                     placeholder="z. B. beige Cargohose – leer lassen für automatische Erkennung",
                     info="Die Analyse beschreibt pro Shot, WIE dieses Produkt in Szene gesetzt wird.")
+                user_api_key = gr.Textbox(
+                    label="Eigener Gemini-API-Key (optional)", type="password",
+                    placeholder="AQ.… – leer lassen, um den Server-Key zu nutzen",
+                    info="Kostenlos auf aistudio.google.com/apikey. Wird nur für deine "
+                         "Requests genutzt, nicht gespeichert.")
                 with_summary = gr.Checkbox(
                     label="Kurze Gesamtzusammenfassung (kostet 1 Extra-Request, %s)"
                           % config.MODEL_SUMMARY, value=False)
@@ -142,7 +166,7 @@ def build_ui():
                        outputs=[scan_box, scan_state])
         analyze_btn.click(do_analyze,
                           inputs=[video, threshold, with_summary, allow_many,
-                                  product_hint, scan_state],
+                                  product_hint, user_api_key, scan_state],
                           outputs=[status, md_view, md_raw, json_raw, files])
     return demo
 
@@ -150,6 +174,9 @@ def build_ui():
 if __name__ == "__main__":
     demo = build_ui()
     port = int(os.environ.get("PORT", os.environ.get("GRADIO_SERVER_PORT", "7860")))
-    demo.queue().launch(server_name="127.0.0.1", server_port=port,
-                        inbrowser=(os.environ.get("VSA_NO_BROWSER", "") == ""),
-                        show_error=True)
+    # Auf Hugging Face Spaces von außen erreichbar sein; lokal nur auf dem eigenen Rechner.
+    # Immer nur 1 Analyse gleichzeitig, damit das API-Kontingent nicht parallel leerläuft.
+    demo.queue(default_concurrency_limit=1).launch(
+        server_name=("0.0.0.0" if ON_HOSTED else "127.0.0.1"), server_port=port,
+        inbrowser=(not ON_HOSTED and os.environ.get("VSA_NO_BROWSER", "") == ""),
+        show_error=True)

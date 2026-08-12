@@ -1,0 +1,11 @@
+# Abhängigkeiten für das Hosting auf Render.com (Python 3.11 via
+# PYTHON_VERSION-Env-Var, siehe render.yaml).
+# NICHT für die lokale Mac-Installation – dafür gilt weiterhin "bash setup.sh"
+# mit requirements.txt (Python 3.9).
+# Getestet mit Python 3.11 + Gradio 5.50 (gleiche Kombination wie das
+# Hugging-Face-Space-Paket).
+gradio==5.50.0
+scenedetect>=0.6.4
+opencv-python-headless>=4.8
+google-genai>=1.0
+imageio-ffmpeg>=0.5

@@ -70,7 +70,7 @@ def scan_report(scan, with_summary):
         lines.append("")
         lines.append("⚠️ WARNUNG: %d Requests sind für den kostenlosen Tarif viel. "
                      "Falls dein Tageskontingent knapp ist, brich ab oder teste "
-                     "zuerst mit einem kürzeren Video." % n_req)
+                     "zuerst mit einem kürzeeren Video." % n_req)
     return "\n".join(lines)
 
 
@@ -78,14 +78,15 @@ def _safe_name(name):
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", name).strip("_") or "video"
 
 
-def run_analysis(scan, with_summary=False, product_hint="", progress=None):
+def run_analysis(scan, with_summary=False, product_hint="", api_key_override="",
+                 progress=None):
     """Schritt 2: Gemini-Analyse. Gibt (markdown, json_dict, md_pfad, json_pfad) zurück."""
 
     def report(msg):
         if progress:
             progress(msg)
 
-    client = make_client()
+    client = make_client(api_key_override)
     uploaded = None
     converted_path = None
     video_for_frames = scan.video_path
