@@ -70,7 +70,7 @@ def scan_report(scan, with_summary):
         lines.append("")
         lines.append("⚠️ WARNUNG: %d Requests sind für den kostenlosen Tarif viel. "
                      "Falls dein Tageskontingent knapp ist, brich ab oder teste "
-                     "zuerst mit einem kürzeeren Video." % n_req)
+                     "zuerst mit einem kürzeren Video." % n_req)
     return "\n".join(lines)
 
 
