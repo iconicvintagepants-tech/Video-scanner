@@ -1,6 +1,13 @@
 # 🎬 Video-Shot-Analyzer
 
-Lokales macOS-Tool: analysiert ein Video shot-für-shot **rein visuell** und extrem
+> ### 🌐 Direkt im Browser nutzen — nichts installieren:
+> ## **https://video-shot-analyzer.onrender.com**
+> Beim ersten Aufruf ~1 Minute Geduld: Das kostenlose Hosting legt die App bei
+> Inaktivität schlafen und weckt sie beim nächsten Besuch wieder auf.
+> Eigener Gemini-API-Key kann im Feld der App eingetragen werden (kostenlos auf
+> [aistudio.google.com/apikey](https://aistudio.google.com/apikey)).
+
+Analysiert ein Video shot-für-shot **rein visuell** und extrem
 detailliert – als Grundlage, um die Clips später in Higgsfield (max. 5 s) nachzubauen.
 Erstellt **keine Prompts**, nur die Analyse (Markdown + JSON).
 
